@@ -3,10 +3,14 @@ import Home from '../src/pages/Home';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Register from './pages/Register';
 import Login from './pages/Login';
-
+import Profile from './pages/Profile';
 import About from './pages/About';
-// import Profile from './components/Profile';
 import Dashboard from './components/Dashboard';
+
+
+
+
+
 function App() {
   return (
     <Router>
@@ -16,11 +20,9 @@ function App() {
 
         <Route path='/' element={<Home />} />
         <Route path='/dashboard' element={<Dashboard />} />
-        {/* <Route path='/profile' element={<Profile />} /> */}
+        <Route path='/Profile' element={<Profile />} />
+        <Route path='/about' element={<About />} />
        
-       
-        <Route path='/About' element={<About />} />
-
       </Routes>
     </Router>
   )
