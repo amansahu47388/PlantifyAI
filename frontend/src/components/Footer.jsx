@@ -4,19 +4,19 @@ import { MdLocationOn, MdEmail, MdPhone } from "react-icons/md";
 const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white py-8">
-      <div className="container mx-auto px-10 grid grid-cols-1 md:grid-cols-3 gap-10 text-center md:text-left">
+      <div className="w-fulln max-w-7xl mx-auto px-10 flex flex-col justify-around md:flex-row  text-center md:text-left gap-30">
         {/* Logo and Description */}
-        <div>
+        <div className="flex-1">
           <h2 className="text-2xl font-bold text-green-400">🌿 Plantify</h2>
-          <p className="mt-4 text-sm text-gray-300">
+          <p className="mt-4 text-sm text-gray-300 text-lg">
             Plantify - Bringing nature closer to you with our premium collection of plants and gardening essentials.
           </p>
         </div>
 
         {/* Contact Info */}
-        <div>
-          <h3 className="text-xl font-semibold text-green-400">CONTACT</h3>
-          <ul className="mt-4 space-y-2 text-gray-300">
+        <div className="flex-1">
+          <h3 className="text-xl font-bold text-green-400">CONTACT</h3>
+          <ul className="mt-4 space-y-2 text-gray-300 text-lg">
             <li className="flex items-center justify-center md:justify-start">
               <MdLocationOn className="mr-2 text-green-300" />
               123 Green St, Nature City, Earth 400701
@@ -33,13 +33,13 @@ const Footer = () => {
         </div>
 
         {/* Quick Links + Social Media */}
-        <div>
-          <h3 className="text-xl font-semibold text-green-400">QUICK LINKS</h3>
-          <ul className="mt-4 space-y-2 text-gray-300">
-            <li><a href="#" className="hover:text-white">Home</a></li>
-            <li><a href="#" className="hover:text-white">Shop</a></li>
-            <li><a href="#" className="hover:text-white">Blog</a></li>
-            <li><a href="#" className="hover:text-white">Contact</a></li>
+        <div className="flex-1">
+          <h3 className="text-xl font-bold text-green-400">QUICK LINKS</h3>
+          <ul className="mt-4 space-y-2 text-gray-300 text-lg">
+            <li><a href="#" className="hover:text-green-400">Home</a></li>
+            <li><a href="#" className="hover:text-green-400">Shop</a></li>
+            <li><a href="#" className="hover:text-green-400">Blog</a></li>
+            <li><a href="#" className="hover:text-green-400">Contact</a></li>
           </ul>
           <div className="mt-4 flex justify-center md:justify-start space-x-4">
             <a href="#" className="text-blue-500 hover:text-white text-xl"><FaLinkedinIn /></a>
