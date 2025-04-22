@@ -71,11 +71,10 @@ const Header = () => {
             ABOUT
           </Link>
           <Link
-            to="/service"
-            className={`px-5 py-2 border rounded transition ${
+            to="/"
+            className={`px-5 py-2   transition ${
               scrolled
-                ? "border-green-600 text-green-600 hover:bg-green-600 hover:text-white"
-                : "border-green-400 text-white hover:bg-green-400 hover:text-white"
+              ? "text-green-700 hover:text-green-900" : "text-white hover:text-green-500"
             }`}
           >
             SERVICES
@@ -150,7 +149,7 @@ const Header = () => {
                     : "border-green-400 bg-green-400 text-white hover:bg-green-500"
                 }`}
               >
-                CREATE ACCOUNT
+               SIGNUP
               </Link>
             </>
           )}
