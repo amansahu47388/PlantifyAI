@@ -15,7 +15,7 @@ const HeroSection = () => {
 
       </div>
       <div className="content flex  items-between mt-50" >
-        <Link to="/prediction" className=" px-12 py-5  bg-green-400 border-green-400 rounded bg-green text-white  transition hover:bg-green-500 border-0">Do The Predictions of crop deseases</Link>
+        <Link to="/dashboard" className=" px-12 py-5  bg-green-600 border-green-600 rounded bg-green text-white  transition hover:bg-green-700 border-0">Do The Predictions of crop deseases</Link>
 
       </div>
     </div>

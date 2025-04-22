@@ -4,11 +4,11 @@ import { MdLocationOn, MdEmail, MdPhone } from "react-icons/md";
 const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white py-8">
-      <div className="w-fulln max-w-7xl mx-auto px-10 flex flex-col justify-around md:flex-row  text-center md:text-left gap-30">
+      <div className="w-full max-w-7xl mx-auto px-10 flex flex-col justify-around md:flex-row  text-center md:text-left gap-30">
         {/* Logo and Description */}
         <div className="flex-1">
           <h2 className="text-2xl font-bold text-green-400">🌿 Plantify</h2>
-          <p className="mt-4 text-sm text-gray-300 text-lg">
+          <p className="mt-4 text-lg text-gray-300 ">
             Plantify - Bringing nature closer to you with our premium collection of plants and gardening essentials.
           </p>
         </div>
@@ -42,10 +42,10 @@ const Footer = () => {
             <li><a href="#" className="hover:text-green-400">Contact</a></li>
           </ul>
           <div className="mt-4 flex justify-center md:justify-start space-x-4">
-            <a href="#" className="text-blue-500 hover:text-white text-xl"><FaLinkedinIn /></a>
-            <a href="#" className="text-blue-400 hover:text-white text-xl"><FaTwitter /></a>
-            <a href="#" className="text-pink-500 hover:text-white text-xl"><FaInstagram /></a>
-            <a href="#" className="text-red-600 hover:text-white text-xl"><FaYoutube /></a>
+            <a href="#" className="text-white hover:text-blue-500 text-xl"><FaLinkedinIn /></a>
+            <a href="#" className="text-white hover:text-blue-400 text-xl"><FaTwitter /></a>
+            <a href="#" className="text-white hover:text-pink-500 text-xl"><FaInstagram /></a>
+            <a href="#" className="text-white hover:text-red-600 text-xl"><FaYoutube /></a>
           </div>
         </div>
       </div>
