@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import CropImage from "./CropImage";
+import Header from "./Header"; // <-- Import your Header component
 
 const Dashboard = () => {
   const [croppedImage, setCroppedImage] = useState(null);
@@ -37,7 +38,7 @@ const Dashboard = () => {
       setPredictionHistory([
         {
           id: predictionHistory.length + 1,
-          email: response.data.email, // Use the email from the backend response
+          email: response.data.email,
           time: new Date().toLocaleString(),
           disease: response.data.disease_name,
           confidence: response.data.confidence,
@@ -54,14 +55,14 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="bg-green-100 min-h-screen">
-      <nav className="bg-white shadow">
-        <div className="container mx-auto flex justify-between items-center p-4">
-          <h1 className="text-2xl font-bold text-green-600">Plantify-AI</h1>
-        </div>
-      </nav>
+    <div className=" h-165  bg-[url('./src/assets/pexels-karoldach-409696.jpg')] bg-cover">
+    <div className=" pt-20 min-h-screen ">
+      
+      {<Header />}
+      
 
       <div className="container mx-auto p-6">
+      
         <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
           <h2 className="text-2xl font-bold mb-4 text-green-600 text-center">
             Plant Disease Detection
@@ -81,8 +82,7 @@ const Dashboard = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className={`bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg ${loading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
+                className={`bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
               >
                 {loading ? "Analyzing..." : "Predict Disease"}
               </button>
@@ -101,12 +101,10 @@ const Dashboard = () => {
             <h3 className="text-xl font-semibold mb-4">Prediction Result</h3>
             <div className="space-y-2">
               <p className="text-lg">
-                <span className="font-semibold">Disease:</span>{" "}
-                {predictionResult.disease_name}
+                <span className="font-semibold">Disease:</span> {predictionResult.disease_name}
               </p>
               <p className="text-lg">
-                <span className="font-semibold">Confidence:</span>{" "}
-                {predictionResult.confidence}%
+                <span className="font-semibold">Confidence:</span> {predictionResult.confidence}%
               </p>
             </div>
           </div>
@@ -114,7 +112,6 @@ const Dashboard = () => {
 
         {predictionHistory.length > 0 && (
           <div className="bg-white rounded-lg shadow-lg p-6">
-            {/* Previous Predictions Section */}
             <div className="container mx-auto p-6">
               <h2 className="text-2xl font-bold mb-2">Previous Predictions</h2>
               <table className="min-w-full bg-white border border-gray-300">
@@ -138,10 +135,9 @@ const Dashboard = () => {
                 </tbody>
               </table>
             </div>
-
-
           </div>
         )}
+      </div>
       </div>
     </div>
   );

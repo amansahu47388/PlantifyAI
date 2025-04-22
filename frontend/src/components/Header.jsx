@@ -7,13 +7,14 @@ import { isAuthenticated, logout } from "../utils/auth";
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef(null);
 
   const handleLogout = () => {
     logout();
   };
 
-  // Close dropdown on outside click
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -21,30 +22,61 @@ const Header = () => {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Listen for scroll and update header background
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
     };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <nav className="bg-transparent p-6 fixed top-0 left-0 w-full z-50">
+    <nav
+      className={`p-4 fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+        scrolled ? "bg-white shadow-md" : "bg-transparent"
+      }`}
+    >
       <div className="container mx-auto flex justify-between items-center relative">
         {/* Logo */}
-        <a href="/" className="text-white text-2xl font-bold">
+        <a
+          href="/"
+          className={`text-2xl font-bold transition-colors ${
+            scrolled ? "text-green-600" : "text-white"
+          }`}
+        >
           Plantify AI
         </a>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-10">
-          <Link to="/" className="px-5 py-2 text-white hover:text-green-500 transition">
+          <Link
+            to="/"
+            className={`px-5 py-2 transition ${
+              scrolled ? "text-green-700 hover:text-green-900" : "text-white hover:text-green-500"
+            }`}
+          >
             HOME
           </Link>
-          <Link to="/About" className="px-5 py-2 text-white hover:text-green-500 transition">
+          <Link
+            to="/About"
+            className={`px-5 py-2 transition ${
+              scrolled ? "text-green-700 hover:text-green-900" : "text-white hover:text-green-500"
+            }`}
+          >
             ABOUT
           </Link>
           <Link
             to="/service"
-            className="px-5 py-2 border border-green-400 rounded text-white hover:bg-green hover:text-green-400 transition"
+            className={`px-5 py-2 border rounded transition ${
+              scrolled
+                ? "border-green-600 text-green-600 hover:bg-green-600 hover:text-white"
+                : "border-green-400 text-white hover:bg-green-400 hover:text-white"
+            }`}
           >
             SERVICES
           </Link>
@@ -53,7 +85,11 @@ const Header = () => {
             <>
               <Link
                 to="/dashboard"
-                className="px-5 py-2 border border-green-400 rounded bg-green-400 text-white hover:bg-green-500 transition"
+                className={`px-5 py-2 border rounded transition ${
+                  scrolled
+                    ? "border-green-600 bg-green-600 text-white hover:bg-green-700"
+                    : "border-green-400 bg-green-400 text-white hover:bg-green-500"
+                }`}
               >
                 DASHBOARD
               </Link>
@@ -62,7 +98,9 @@ const Header = () => {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="text-3xl text-green-400 max-auto hover:text-green-500"
+                  className={`text-3xl transition ${
+                    scrolled ? "text-green-600 hover:text-green-700" : "text-green-400 hover:text-green-500"
+                  }`}
                 >
                   <FaUserCircle />
                 </button>
@@ -96,13 +134,21 @@ const Header = () => {
             <>
               <Link
                 to="/login"
-                className="px-5 py-2 border border-green-400 rounded bg-green-400 text-white hover:bg-green-500 transition"
+                className={`px-5 py-2 border rounded transition ${
+                  scrolled
+                    ? "border-green-600 bg-green-600 text-white hover:bg-green-700"
+                    : "border-green-400 bg-green-400 text-white hover:bg-green-500"
+                }`}
               >
                 LOGIN
               </Link>
               <Link
                 to="/register"
-                className="px-5 py-2 border border-green-400 rounded bg-green-400 text-white hover:bg-green-500 transition"
+                className={`px-5 py-2 border rounded transition ${
+                  scrolled
+                    ? "border-green-600 bg-green-600 text-white hover:bg-green-700"
+                    : "border-green-400 bg-green-400 text-white hover:bg-green-500"
+                }`}
               >
                 CREATE ACCOUNT
               </Link>
@@ -112,7 +158,9 @@ const Header = () => {
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden text-black border border-black p-2 rounded focus:outline-none"
+          className={`md:hidden p-2 border rounded focus:outline-none transition ${
+            scrolled ? "text-green-600 border-green-600" : "text-white border-white"
+          }`}
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -126,24 +174,10 @@ const Header = () => {
         }`}
       >
         <div className="flex flex-col space-y-4">
-          <Link to="/" className="text-black hover:text-gray-600 transition">
-            Home
-          </Link>
-          <Link to="/About" className="text-black hover:text-gray-600 transition">
-            About
-          </Link>
-          <Link
-            to="/service"
-            className="px-4 py-2 border border-black rounded hover:bg-black hover:text-white transition"
-          >
-            Services
-          </Link>
-          <Link
-            to="/contact"
-            className="px-4 py-2 border border-black rounded bg-black text-white hover:bg-gray-800 transition"
-          >
-            Contact
-          </Link>
+          <Link to="/" className="text-black hover:text-gray-600 transition">Home</Link>
+          <Link to="/About" className="text-black hover:text-gray-600 transition">About</Link>
+          <Link to="/service" className="text-black hover:text-gray-600 transition">Services</Link>
+          <Link to="/contact" className="text-black hover:text-gray-600 transition">Contact</Link>
         </div>
       </div>
     </nav>
