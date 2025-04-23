@@ -3,7 +3,7 @@ import Card from '@mui/material/Card';
 
 const Services = () => {
   return (
-    <div className="bg-white flex flex-col items-center justify-center py-10">
+    <div id='services' className="bg-white flex flex-col items-center justify-center py-10">
       <h1 className="font-bold text-4xl text-green-500">Our Services</h1>
       <div className="flex flex-wrap justify-center gap-6 p-4 sm:m-10">
         <Card sx={{ maxWidth: 345 }} className="w-full sm:w-[300px] md:w-[345px] ">

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { FaUserCircle } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { HashLink } from 'react-router-hash-link';
 import { isAuthenticated, logout } from "../utils/auth";
 
 const Header = () => {
@@ -70,15 +71,15 @@ const Header = () => {
           >
             ABOUT
           </Link>
-          <Link
-            to="/"
-            className={`px-5 py-2   transition ${
-              scrolled
-              ? "text-green-700 hover:text-green-900" : "text-white hover:text-green-500"
+          <HashLink
+            smooth
+            to="/#services"
+            className={`px-5 py-2 transition ${
+              scrolled ? "text-green-700 hover:text-green-900" : "text-white hover:text-green-500"
             }`}
           >
             SERVICES
-          </Link>
+          </HashLink>
 
           {isAuthenticated() ? (
             <>
@@ -175,7 +176,7 @@ const Header = () => {
         <div className="flex flex-col space-y-4">
           <Link to="/" className="text-black hover:text-gray-600 transition">Home</Link>
           <Link to="/About" className="text-black hover:text-gray-600 transition">About</Link>
-          <Link to="/service" className="text-black hover:text-gray-600 transition">Services</Link>
+          <HashLink smooth to="/#services" className="text-black hover:text-gray-600 transition">Services</HashLink>
           <Link to="/contact" className="text-black hover:text-gray-600 transition">Contact</Link>
         </div>
       </div>

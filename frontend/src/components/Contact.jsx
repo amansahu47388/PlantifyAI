@@ -1,7 +1,8 @@
 import React from "react";
 const Contact = () => {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-green-500 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-green-500 p-4">
+      <h1 className="font-bold text-4xl text-white mb-5">Contact Us</h1>
       <div className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row max-w-4xl w-full">
         {/* Left Image Section */}
         <div className="md:w-1/2 w-full">
