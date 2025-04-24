@@ -110,13 +110,27 @@ const Profile = () => {
 
   const handleSave = async () => {
     try {
-      const response = await axiosInstance.put('/account/profile/', editedProfile);
+      // Format the data to match backend expectations
+      const formData = {
+        // User related fields
+        first_name: editedProfile?.user?.first_name || '',
+        last_name: editedProfile?.user?.last_name || '',
+        // Profile fields
+        bio: editedProfile?.bio || '',
+        phone: editedProfile?.phone || '',
+        address: editedProfile?.address || '',
+        dob: editedProfile?.dob || null
+      };
+
+      const response = await axiosInstance.put('/account/profile/', formData);
+      
       if (response.data) {
         setProfile(response.data);
         setIsEditing(false);
         setError('');
       }
     } catch (err) {
+      console.error('Profile update error:', err);
       setError(err.response?.data?.error || 'Failed to update profile');
     }
   };
