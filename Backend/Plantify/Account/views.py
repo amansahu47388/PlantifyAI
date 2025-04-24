@@ -12,7 +12,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.decorators import login_required
 from .models import UserProfile
-
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.models import User  # Import the built-in User model
+from .serializers import ProfileSerializer
 
 User = get_user_model()
 
@@ -77,8 +79,16 @@ class RegisterView(APIView):
                 last_name=data['last_name']
             )
             
-            # Generate auth token
-            token, _ = Token.objects.get_or_create(user=user)
+            # Create user profile
+            UserProfile.objects.create(
+                user=user,
+                bio='',
+                location='',
+                phone=''
+            )
+            
+            # Generate JWT tokens instead of auth token
+            refresh = MyTokenObtainPairSerializer.get_token(user)
             
             return Response({
                 'success': 'User registered successfully',
@@ -87,7 +97,8 @@ class RegisterView(APIView):
                     'email': user.email,
                     'first_name': user.first_name,
                     'last_name': user.last_name,
-                    'token': token.key
+                    'access': str(refresh.access_token),
+                    'refresh': str(refresh)
                 }
             }, status=status.HTTP_201_CREATED)
             
@@ -128,8 +139,8 @@ class LoginView(APIView):
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
-            # Generate token
-            token, _ = Token.objects.get_or_create(user=user)
+            # Generate JWT tokens
+            refresh = MyTokenObtainPairSerializer.get_token(user)
             
             return Response({
                 'success': 'Login successful',
@@ -138,7 +149,8 @@ class LoginView(APIView):
                     'email': user.email,
                     'first_name': user.first_name,
                     'last_name': user.last_name,
-                    'token': token.key
+                    'access': str(refresh.access_token),
+                    'refresh': str(refresh)
                 }
             }, status=status.HTTP_200_OK)
             
@@ -148,26 +160,59 @@ class LoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-@login_required
-class ProfileView(APIView):
+
+
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
         try:
-            user = request.user
-            return Response({
-                'success': 'User profile fetched successfully',
-                'data': {
-                    'user_id': user.id,
-                    'email': user.email,
-                    'first_name': user.first_name,
-                    'last_name': user.last_name,
-                    'image': user.profile.image.url if user.profile.image else None,
-                    'bio': user.profile.bio,
-                    'location': user.profile.location,
-                    'birth_date': user.profile.birth_date,
-                    'phone': user.profile.phone,
-
+            profile, created = UserProfile.objects.get_or_create(
+                user=request.user,
+                defaults={
+                    'bio': '',
+                    'address': '',
+                    'dob': None,
+                    'phone': '',
+                    'profile_image': None
                 }
-            }, status=status.HTTP_200_OK)
+            )
+            serializer = ProfileSerializer(profile, context={'request': request})
+            return Response(serializer.data)
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    def put(self, request):
+        try:
+            profile = UserProfile.objects.get(user=request.user)
+            data = request.data.copy()
+
+            if 'profile_image' in request.FILES:
+                # Delete old image if it exists and is not the default
+                if profile.profile_image and profile.profile_image.name != 'default.jpg':
+                    try:
+                        profile.profile_image.delete(save=False)
+                    except:
+                        pass  # Ignore if file doesn't exist
+                data['profile_image'] = request.FILES['profile_image']
+
+            serializer = ProfileSerializer(profile, data=data, partial=True, context={'request': request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except UserProfile.DoesNotExist:
+            return Response(
+                {'error': 'Profile not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
         except Exception as e:
             return Response(
                 {'error': str(e)},
