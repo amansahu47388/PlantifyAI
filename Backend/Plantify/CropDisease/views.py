@@ -9,7 +9,7 @@ from django.contrib.auth.decorators import login_required
 
 # Define working directory and paths
 working_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(working_dir, 'trained_model', 'plant_disease_prediction_model.h5')
+model_path = os.path.join(working_dir, 'trained_model', 'Plantify2_VGG16.h5')
 class_indices_path = os.path.join(working_dir, 'class_indices.json')
 
 # Load the pre-trained model

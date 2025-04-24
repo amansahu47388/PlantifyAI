@@ -25,17 +25,19 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await axiosInstance.post('/account/login/', formData);
+      // JWT expects 'username' and 'password', so map email to username
+      const response = await axiosInstance.post('/account/token/', {
+        username: formData.email,
+        password: formData.password,
+      });
 
-      if (response.data.success) {
-        // Store token in localStorage
-        localStorage.setItem('token', response.data.data.token);
-
-        // Redirect to dashboard
+      if (response.data.access) {
+        localStorage.setItem('access_token', response.data.access);
+        localStorage.setItem('refresh_token', response.data.refresh);
         navigate('/');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
+      setError(err.response?.data?.detail || 'Login failed');
     } finally {
       setLoading(false);
     }

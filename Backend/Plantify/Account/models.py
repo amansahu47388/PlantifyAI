@@ -1,5 +1,8 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from django.contrib.auth.models import User
+from django.conf import settings
+import os
 
 class CustomUserManager(BaseUserManager):
     use_in_migrations = True
@@ -59,14 +62,21 @@ class CustomUser(AbstractUser):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     bio = models.TextField(blank=True)
-    location = models.CharField(max_length=100, blank=True)
-    birth_date = models.DateField(null=True, blank=True)
+    address = models.CharField(max_length=100, blank=True)
+    dob = models.DateField(null=True, blank=True)
     phone = models.CharField(max_length=10, blank=True)
-    image = models.ImageField(upload_to='profile_pics', default='default.jpg')
+    profile_image = models.ImageField(upload_to='profile_pics/', default='default.jpg')
 
     def __str__(self):
         return f'{self.user.email} Profile'
+
+    def save(self, *args, **kwargs):
+        # Create directory if it doesn't exist
+        if self.profile_image:
+            img_path = os.path.join(settings.MEDIA_ROOT, 'profile_pics')
+            os.makedirs(img_path, exist_ok=True)
+        super().save(*args, **kwargs)
 
 
