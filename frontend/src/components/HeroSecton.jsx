@@ -11,7 +11,7 @@ const HeroSection = () => {
       <video src={video} autoPlay loop muted />
 
       <div className="content ">
-        <h1 className="heading">Welcome to Plantify <br></br> choose the better Crop</h1>
+        <h1 className="heading">Welcome to Plantify <br></br> Do The Predict Disease</h1>
 
       </div>
       <div className="content flex  items-between mt-50" >
