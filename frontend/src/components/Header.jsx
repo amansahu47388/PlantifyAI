@@ -38,11 +38,8 @@ const Header = () => {
     // Check auth status initially
     checkAuth();
 
-    // Check auth status when localStorage changes
+    // Check auth status when localStorage changes (cross-tab)
     window.addEventListener('storage', checkAuth);
-
-    // Check auth status periodically
-    const interval = setInterval(checkAuth, 1000);
 
     // Handle scroll events for navbar transparency
     const handleScroll = () => {
@@ -54,7 +51,6 @@ const Header = () => {
     return () => {
       window.removeEventListener('storage', checkAuth);
       window.removeEventListener('scroll', handleScroll);
-      clearInterval(interval);
     };
   }, []);
 
@@ -94,7 +90,7 @@ const Header = () => {
         </Link>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex space-x-10">
+        <div className="hidden md:flex space-x-10 items-center">
           <Link
             to="/"
             className={`transition ${scrolled ? "text-green-700" : "text-white"
@@ -127,15 +123,14 @@ const Header = () => {
                   : "bg-green-500 text-white hover:bg-green-600 hover:text-white"
                   }`}
               >
-                DASHBOARD
+                PREDICT DISEASE
               </Link>
 
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className={`flex items-center justify-center w-10 h-10 rounded-full overflow-hidden transition ${
-                    scrolled ? "border-2 border-green-600" : "border-2 border-white"
-                  }`}
+                  className={`flex items-center justify-center w-10 h-10 rounded-full overflow-hidden transition ${scrolled ? "border-2 border-green-600" : "border-2 border-white"
+                    }`}
                 >
                   {profileData?.image_url ? (
                     <img
@@ -144,13 +139,14 @@ const Header = () => {
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = '/media/profile_pics/default.jpg';
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<div class="w-full h-full flex items-center justify-center bg-gray-50"><div class="text-green-600 text-2xl"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 496 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8zm0 96c48.6 0 88 39.4 88 88s-39.4 88-88 88-88-39.4-88-88 39.4-88 88-88zm0 344c-58.7 0-111.3-26.6-146.5-68.2 18.8-35.4 55.6-59.8 98.5-59.8 2.4 0 4.8.4 7.1 1.1 13 4.2 26.6 6.9 40.9 6.9 14.3 0 28-2.7 40.9-6.9 2.3-.7 4.7-1.1 7.1-1.1 42.9 0 79.7 24.4 98.5 59.8C359.3 421.4 306.7 448 248 448z"></path></svg></div></div>';
                       }}
                     />
                   ) : (
-                    <FaUserCircle className={`text-3xl ${
-                      scrolled ? "text-green-600" : "text-white"
-                    }`} />
+                    <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                      <FaUserCircle className="text-green-600 text-2xl" />
+                    </div>
                   )}
                 </button>
                 {dropdownOpen && (
@@ -186,7 +182,7 @@ const Header = () => {
               <Link
                 to="/signup"
                 className={`px-5 py-2 rounded  transition ${scrolled
-                    ? "bg-green-500 text-white hover:bg-green-600 hover:text-white"
+                  ? "bg-green-500 text-white hover:bg-green-600 hover:text-white"
                   : "bg-green-500 text-white hover:bg-green-600 hover:text-white"
                   }`}
               >
@@ -241,7 +237,7 @@ const Header = () => {
                   className="text-gray-700 hover:text-green-600 transition"
                   onClick={() => setIsOpen(false)}
                 >
-                  Dashboard
+                  Predict Disease
                 </Link>
                 <Link
                   to="/profile"
