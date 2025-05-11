@@ -5,6 +5,7 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import Profile from './pages/Profile';
 import About from './pages/About';
+import OTPVerification from './pages/OTPVerification';
 import Dashboard from './components/Dashboard';
 import { isAuthenticated } from './utils/auth';
 
@@ -19,6 +20,7 @@ function App() {
       <Routes>
         <Route path='/signup' element={<Signup />} />
         <Route path='/login' element={<Login />} />
+        <Route path='/verify-otp' element={<OTPVerification />} />
         <Route path='/' element={<Home />} />
         <Route 
           path='/dashboard' 

@@ -18,10 +18,21 @@ const Signup = () => {
   const handleSignupSubmit = async (formData) => {
     const response = await axiosInstance.post('/account/register/', formData);
     if (response.data.success) {
-      // Store token in localStorage
-      localStorage.setItem('token', response.data.data.token);
-      // Redirect to login page
-      navigate('/login');
+      // Check if email verification is required
+      if (response.data.data?.requires_verification) {
+        // Redirect to OTP verification page
+        navigate('/verify-otp', { 
+          state: { email: formData.email } 
+        });
+      } else {
+        // Directly redirect to login
+        navigate('/login', { 
+          state: { 
+            registered: true,
+            message: 'Registration successful! You can now log in.' 
+          } 
+        });
+      }
     }
     return response;
   };
