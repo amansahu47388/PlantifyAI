@@ -1,47 +1,41 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axios';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
+import { validateLogin } from '../utils/validation';
+import useFormValidation from '../utils/useFormValidation';
 
 const Login = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const initialState = {
     email: '',
     password: ''
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
+  const handleLoginSubmit = async (formData) => {
+    // JWT expects 'username' and 'password', so map email to username
+    const response = await axiosInstance.post('/account/token/', {
+      username: formData.email,
+      password: formData.password,
     });
-  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      // JWT expects 'username' and 'password', so map email to username
-      const response = await axiosInstance.post('/account/token/', {
-        username: formData.email,
-        password: formData.password,
-      });
-
-      if (response.data.access) {
-        localStorage.setItem('access_token', response.data.access);
-        localStorage.setItem('refresh_token', response.data.refresh);
-        navigate('/');
-      }
-    } catch (err) {
-      setError(err.response?.data?.detail || 'Login failed');
-    } finally {
-      setLoading(false);
+    if (response.data.access) {
+      localStorage.setItem('access_token', response.data.access);
+      localStorage.setItem('refresh_token', response.data.refresh);
+      navigate('/');
     }
+    return response;
   };
+
+  const {
+    formData,
+    errors,
+    serverError,
+    isSubmitting,
+    handleChange,
+    handleBlur,
+    handleSubmit
+  } = useFormValidation(initialState, validateLogin, handleLoginSubmit);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[url('./src/assets/Signup_background_image.jpg')] bg-cover">
@@ -67,11 +61,13 @@ const Login = () => {
                   name="email"
                   type="email"
                   required
-                  className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  className={`w-full px-4 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-400'} rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400`}
                   placeholder="Email address"
                   value={formData.email}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                 />
+                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
               <div className="mb-4">
                 <label htmlFor="password" className="block text-gray-700">Password</label>
@@ -80,29 +76,31 @@ const Login = () => {
                   name="password"
                   type="password"
                   required
-                  className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  className={`w-full px-4 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-400'} rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400`}
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                 />
+                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
               </div>
             </div>
 
-            {error && (
-              <div className="text-red-500 text-sm text-center">
-                {error}
+            {serverError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <span className="block sm:inline">{serverError}</span>
               </div>
             )}
 
             <div>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isSubmitting}
                 className="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition duration-300"
               >
-                {loading ? 'Signing in...' : 'Sign in'}
+                {isSubmitting ? 'Signing in...' : 'Sign in'}
               </button>
-              <p className='mt-2 text-center md:text-left'>Already have an Account? <Link to="/signup" className="text-green-500">Sign Up</Link></p>
+              <p className='mt-2 text-center md:text-left'>Don't have an account? <Link to="/signup" className="text-green-500">Sign Up</Link></p>
             </div>
           </form>
         </div>

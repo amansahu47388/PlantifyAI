@@ -1,48 +1,41 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../utils/axios';
 import { Link } from 'react-router-dom';
+import { validateSignup } from '../utils/validation';
+import useFormValidation from '../utils/useFormValidation';
 
 const Signup = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const initialState = {
     email: '',
     password: '',
     password2: '',
     first_name: '',
     last_name: ''
-  });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-
-    try {
-      const response = await axiosInstance.post('/account/register/', formData);
-
-      if (response.data.success) {
-        // Store token in localStorage
-        localStorage.setItem('token', response.data.data.token);
-
-        // Redirect to login or dashboard
-        navigate('/login');
-      }
-    } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed');
-    } finally {
-      setLoading(false);
+  const handleSignupSubmit = async (formData) => {
+    const response = await axiosInstance.post('/account/register/', formData);
+    if (response.data.success) {
+      // Store token in localStorage
+      localStorage.setItem('token', response.data.data.token);
+      // Redirect to login page
+      navigate('/login');
     }
+    return response;
   };
+
+  const {
+    formData,
+    errors,
+    serverError,
+    isSubmitting,
+    handleChange,
+    handleBlur,
+    handleSubmit
+  } = useFormValidation(initialState, validateSignup, handleSignupSubmit);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[url('./src/assets/Signup_background_image.jpg')] bg-cover">
       <div className="w-full max-w-6xl bg-transparent flex flex-col md:flex-row rounded-2xl overflow-hidden ">
@@ -59,9 +52,9 @@ const Signup = () => {
         <div className="md:w-1/2 w-full bg-green-100 px-6 md:px-10 py-6 md:py-3 rounded-none md:rounded-l-3xl relative">
           <h2 className="text-2xl font-semibold mb-2 text-green-500 text-center md:text-left">Sign Up</h2>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            {error && (
+            {serverError && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                <span className="block sm:inline">{error}</span>
+                <span className="block sm:inline">{serverError}</span>
               </div>
             )}
             <div className="rounded-md shadow-sm -space-y-px">
@@ -72,11 +65,13 @@ const Signup = () => {
                   name="first_name"
                   type="text"
                   required
-                  className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  className={`w-full px-4 py-2 border ${errors.first_name ? 'border-red-500' : 'border-gray-400'} rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400`}
                   placeholder="First Name"
                   value={formData.first_name}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                 />
+                {errors.first_name && <p className="text-red-500 text-xs mt-1">{errors.first_name}</p>}
               </div>
               <div className="mb-4">
                 <label htmlFor="last_name" className="block text-gray-700">Last Name</label>
@@ -85,11 +80,13 @@ const Signup = () => {
                   name="last_name"
                   type="text"
                   required
-                  className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  className={`w-full px-4 py-2 border ${errors.last_name ? 'border-red-500' : 'border-gray-400'} rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400`}
                   placeholder="Last Name"
                   value={formData.last_name}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                 />
+                {errors.last_name && <p className="text-red-500 text-xs mt-1">{errors.last_name}</p>}
               </div>
               <div className="mb-4">
                 <label className="block text-gray-700">Email </label>
@@ -98,11 +95,13 @@ const Signup = () => {
                   name="email"
                   type="email"
                   required
-                  className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  className={`w-full px-4 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-400'} rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400`}
                   placeholder="Email address"
                   value={formData.email}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                 />
+                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
               <div className="mb-4">
                 <label htmlFor="password" className="block text-gray-700">Password</label>
@@ -111,11 +110,13 @@ const Signup = () => {
                   name="password"
                   type="password"
                   required
-                  className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  className={`w-full px-4 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-400'} rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400`}
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                 />
+                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
               </div>
               <div className="mb-4">
                 <label htmlFor="password2" className="block text-gray-700">Confirm Password</label>
@@ -124,20 +125,22 @@ const Signup = () => {
                   name="password2"
                   type="password"
                   required
-                  className="w-full px-4 py-2 border border-gray-400 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400"
+                  className={`w-full px-4 py-2 border ${errors.password2 ? 'border-red-500' : 'border-gray-400'} rounded-md focus:outline-none focus:ring-1 focus:ring-gray-400`}
                   placeholder="Confirm Password"
                   value={formData.password2}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                 />
+                {errors.password2 && <p className="text-red-500 text-xs mt-1">{errors.password2}</p>}
               </div>
             </div>
             <div className="mb-4">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isSubmitting}
                 className="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition duration-300"
               >
-                {loading ? 'Registering...' : 'Register'}
+                {isSubmitting ? 'Registering...' : 'Register'}
               </button>
               <p className='mt-4 text-center md:text-left'>Already have an Account? <Link to="/login" className="text-green-600">Sign In</Link></p>
             </div>
