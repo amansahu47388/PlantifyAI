@@ -3,6 +3,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 import os
+from django.utils import timezone
+import random
+import string
 
 class CustomUserManager(BaseUserManager):
     use_in_migrations = True
@@ -30,6 +33,7 @@ class CustomUser(AbstractUser):
     last_name = models.CharField(max_length=30)
     date_joined = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
+    is_email_verified = models.BooleanField(default=False)
 
     # Add related_name arguments to resolve the clash
     groups = models.ManyToManyField(
@@ -68,6 +72,7 @@ class UserProfile(models.Model):
     dob = models.DateField(null=True, blank=True)
     phone = models.CharField(max_length=10, blank=True)
     profile_image = models.ImageField(upload_to='profile_pics/', default='default.jpg')
+    is_email_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.user.email} Profile'
@@ -78,5 +83,31 @@ class UserProfile(models.Model):
             img_path = os.path.join(settings.MEDIA_ROOT, 'profile_pics')
             os.makedirs(img_path, exist_ok=True)
         super().save(*args, **kwargs)
+
+
+class EmailVerification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_verified = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.email} - {self.otp}"
+    
+    def save(self, *args, **kwargs):
+        # Set expiration time to 10 minutes from creation if not set
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timezone.timedelta(minutes=10)
+        super().save(*args, **kwargs)
+    
+    @staticmethod
+    def generate_otp():
+        # Generate a 6-digit OTP
+        return ''.join(random.choices(string.digits, k=6))
+    
+    def is_valid(self):
+        # Check if OTP is expired
+        return timezone.now() <= self.expires_at and not self.is_verified
 
 

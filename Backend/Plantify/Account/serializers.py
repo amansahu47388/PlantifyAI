@@ -1,4 +1,4 @@
-from Account.models import CustomUser
+from Account.models import CustomUser, EmailVerification
 from django.contrib.auth.password_validation import validate_password
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
@@ -101,10 +101,39 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = CustomUser.objects.create(
             username=validated_data['username'],
             email=validated_data['email']
-
         )
 
         user.set_password(validated_data['password'])
         user.save()
 
         return user
+
+
+# Email Verification OTP Serializer
+class EmailVerificationSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    otp = serializers.CharField(required=False, max_length=6, min_length=6)
+    
+    def validate_email(self, value):
+        try:
+            User.objects.get(email=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User with this email does not exist")
+        return value
+    
+    def validate_otp(self, value):
+        if value and not value.isdigit():
+            raise serializers.ValidationError("OTP must contain only digits")
+        return value
+
+
+# Resend OTP Serializer
+class ResendOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    
+    def validate_email(self, value):
+        try:
+            User.objects.get(email=value)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User with this email does not exist")
+        return value

@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../utils/axios';
 import { Link } from 'react-router-dom';
 import { validateLogin } from '../utils/validation';
@@ -7,6 +7,18 @@ import useFormValidation from '../utils/useFormValidation';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // Check for success messages from verification or registration
+  useEffect(() => {
+    if (location.state?.verified) {
+      setSuccessMessage(location.state.message || 'Email verified successfully!');
+    } else if (location.state?.registered) {
+      setSuccessMessage(location.state.message || 'Registration successful!');
+    }
+  }, [location]);
+
   const initialState = {
     email: '',
     password: ''
@@ -34,8 +46,17 @@ const Login = () => {
     isSubmitting,
     handleChange,
     handleBlur,
-    handleSubmit
+    handleSubmit,
+    setServerError
   } = useFormValidation(initialState, validateLogin, handleLoginSubmit);
+
+  // Handle case where login fails due to email not verified
+  useEffect(() => {
+    if (serverError && serverError.includes('Email not verified')) {
+      // Redirect to verification page
+      navigate('/verify-otp', { state: { email: formData.email } });
+    }
+  }, [serverError, navigate, formData.email]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[url('./src/assets/Signup_background_image.jpg')] bg-cover">
@@ -52,6 +73,13 @@ const Login = () => {
         {/* Right Side */}
         <div className="md:w-1/2 w-full bg-green-100 px-6 md:px-10 py-6 md:py-3 rounded-none md:rounded-l-3xl relative flex flex-col justify-center">
           <h2 className="text-2xl font-semibold mb-2 text-green-500 text-center md:text-left">Sign In</h2>
+          
+          {successMessage && (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
+              <span className="block sm:inline">{successMessage}</span>
+            </div>
+          )}
+          
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             <div className="rounded-md shadow-sm -space-y-px">
               <div className="mb-4">
@@ -86,7 +114,7 @@ const Login = () => {
               </div>
             </div>
 
-            {serverError && (
+            {serverError && !serverError.includes('Email not verified') && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
                 <span className="block sm:inline">{serverError}</span>
               </div>
