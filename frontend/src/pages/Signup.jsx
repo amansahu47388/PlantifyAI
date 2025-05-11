@@ -54,9 +54,10 @@ const Signup = () => {
         <div className="md:w-1/2 w-full bg-transparent px-6 md:px-10 py-10 text-white">
           <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">Sign<br />Up.</h1>
           <p className="text-base text-white/80 mb-10 hidden md:block">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...
+           Beyond identification, Plantify offers an AI assistant that not only names your plant but also provides guidance on care, warns about potential diseases, and suggests treatment options. This interactive experience sets Plantify apart, making it a valuable tool for plant enthusiasts. 
+
           </p>
-          <p className="text-sm text-white/60">© 20xx Company</p>
+          <p className="text-sm text-white/60">© Plantify-AI</p>
         </div>
 
         {/* Right Side */}

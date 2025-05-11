@@ -4,21 +4,21 @@ from rest_framework.response import Response
 from rest_framework import authentication, permissions
 from django.contrib.auth import get_user_model, authenticate, login
 from rest_framework import status
-from .serializers import RegisterSerializer, EmailVerificationSerializer, ResendOTPSerializer
+from .serializers import RegisterSerializer, EmailVerificationSerializer, ResendOTPSerializer, PasswordResetRequestSerializer, PasswordResetVerifySerializer, PasswordResetConfirmSerializer
 from rest_framework.authtoken.models import Token
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.decorators import login_required
-from .models import UserProfile, EmailVerification
+from .models import UserProfile, EmailVerification, PasswordResetToken
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User  # Import the built-in User model
 from .serializers import ProfileSerializer
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings 
-from .utils import send_otp_email
+from .utils import send_otp_email, validate_password_strength, get_password_strength_score, send_email_with_fallback
 
 User = get_user_model()
 
@@ -71,6 +71,14 @@ class RegisterView(APIView):
             if data['password'] != data['password2']:
                 return Response(
                     {'error': 'Passwords do not match'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Validate password strength
+            is_valid, errors = validate_password_strength(data['password'])
+            if not is_valid:
+                return Response(
+                    {'error': 'Password is not strong enough', 'details': errors},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
@@ -400,3 +408,167 @@ class UserProfileView(APIView):
                 {'error': str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+class CheckPasswordStrengthView(APIView):
+    """
+    API endpoint to check password strength without creating a user.
+    This allows frontend to provide real-time feedback as users type their password.
+    """
+    def post(self, request):
+        password = request.data.get('password', '')
+        
+        if not password:
+            return Response({
+                'score': 0,
+                'strength': 'Weak',
+                'feedback': ['Password is required']
+            })
+        
+        # Check if password meets minimum requirements
+        is_valid, errors = validate_password_strength(password)
+        
+        # Get detailed strength score and feedback
+        score, feedback = get_password_strength_score(password)
+        
+        # Determine strength category
+        if score < 40:
+            strength = 'Weak'
+        elif score < 70:
+            strength = 'Medium'
+        else:
+            strength = 'Strong'
+        
+        return Response({
+            'score': score,
+            'is_valid': is_valid,
+            'strength': strength,
+            'feedback': errors if errors else feedback
+        })
+
+class PasswordResetRequestView(APIView):
+    """
+    Request a password reset link
+    """
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        email = serializer.validated_data['email']
+        try:
+            user = User.objects.get(email=email)
+            
+            # Generate a password reset token
+            reset_token = PasswordResetToken.generate_token(user)
+            
+            # Create the reset link pointing to the frontend application
+            protocol = 'https' if request.is_secure() else 'http'
+            domain = request.get_host()
+            
+            # Frontend is likely running on a different port/domain than the backend in development
+            # For local development (adjust these URLs for your environment)
+            if domain == 'localhost:8000' or domain == '127.0.0.1:8000':
+                frontend_base_url = 'http://localhost:5173'  # Typical Vite/React development server
+            else:
+                # In production, frontend and backend might be on the same domain
+                frontend_base_url = f"{protocol}://{domain}"
+                
+            reset_link = f"{frontend_base_url}/reset-password?token={reset_token.token}"
+            
+            # Send the reset link in an email
+            subject = "Reset your PlantifyAI password"
+            plain_message = f"""
+Hello,
+
+You've requested a password reset for your PlantifyAI account.
+
+Please use the following link to reset your password:
+{reset_link}
+
+This link is valid for 24 hours.
+
+If you didn't request this reset, you can safely ignore this email.
+
+Thank you,
+PlantifyAI Team
+"""
+            
+            html_message = f"""
+<html>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 5px;">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <h1 style="color: #2e7d32;">PlantifyAI</h1>
+        </div>
+        <p>Hello,</p>
+        <p>You've requested a password reset for your PlantifyAI account.</p>
+        <p>Please click the button below to reset your password:</p>
+        <div style="text-align: center; margin: 25px 0;">
+            <a href="{reset_link}" style="background-color: #2e7d32; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Reset Password</a>
+        </div>
+        <p>Or copy and paste this link in your browser:</p>
+        <p style="background-color: #f9f9f9; padding: 10px; word-break: break-all;">{reset_link}</p>
+        <p>This link is valid for <strong>24 hours</strong>.</p>
+        <p>If you didn't request this reset, you can safely ignore this email.</p>
+        <p>Thank you,<br>PlantifyAI Team</p>
+    </div>
+</body>
+</html>
+"""
+            
+            email_sent = send_email_with_fallback(
+                subject=subject,
+                message=plain_message,
+                recipient_email=email,
+                html_message=html_message
+            )
+            
+            return Response({
+                'success': 'Password reset link has been sent to your email.',
+                'email_sent': email_sent
+            })
+            
+        except User.DoesNotExist:
+            return Response({
+                'error': 'User not found',
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({
+                'error': str(e),
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetVerifyView(APIView):
+    """
+    Verify if a password reset token is valid
+    """
+    def post(self, request):
+        serializer = PasswordResetVerifySerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        token = serializer.validated_data['token']
+        # Token validation is done in the serializer
+        
+        return Response({
+            'success': 'Token is valid.',
+            'token': token
+        })
+
+
+class PasswordResetConfirmView(APIView):
+    """
+    Reset password using a valid token
+    """
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Reset password and mark token as used
+        user = serializer.save()
+        
+        return Response({
+            'success': 'Password has been reset successfully.',
+            'email': user.email
+        })

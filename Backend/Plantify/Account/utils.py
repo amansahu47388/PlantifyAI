@@ -5,6 +5,8 @@ from django.conf import settings
 from django.core.mail import send_mail
 import logging
 import os
+import re
+from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -131,3 +133,97 @@ PlantifyAI Team
 """
     
     return send_email_with_fallback(subject, plain_message, email, html_message)
+
+def validate_password_strength(password):
+    """
+    Validates password strength according to settings.PASSWORD_STRENGTH_PARAMS
+    Returns (is_valid, errors) tuple
+    """
+    errors = []
+    is_valid = True
+    
+    # Check minimum length
+    if len(password) < settings.PASSWORD_STRENGTH_PARAMS.get('MIN_LENGTH', 8):
+        errors.append(f"Password must be at least {settings.PASSWORD_STRENGTH_PARAMS.get('MIN_LENGTH', 8)} characters")
+        is_valid = False
+    
+    # Check for uppercase letters
+    if settings.PASSWORD_STRENGTH_PARAMS.get('REQUIRE_UPPERCASE', True) and not re.search(r'[A-Z]', password):
+        errors.append("Password must contain at least one uppercase letter")
+        is_valid = False
+    
+    # Check for lowercase letters
+    if settings.PASSWORD_STRENGTH_PARAMS.get('REQUIRE_LOWERCASE', True) and not re.search(r'[a-z]', password):
+        errors.append("Password must contain at least one lowercase letter")
+        is_valid = False
+    
+    # Check for numbers
+    if settings.PASSWORD_STRENGTH_PARAMS.get('REQUIRE_NUMBERS', True) and not re.search(r'[0-9]', password):
+        errors.append("Password must contain at least one number")
+        is_valid = False
+    
+    # Check for special characters
+    if settings.PASSWORD_STRENGTH_PARAMS.get('REQUIRE_SPECIAL_CHARS', True) and not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        errors.append("Password must contain at least one special character")
+        is_valid = False
+    
+    return is_valid, errors
+
+def get_password_strength_score(password):
+    """
+    Calculates a password strength score from 0-100
+    Returns (score, feedback) tuple
+    """
+    score = 0
+    feedback = []
+    
+    # Length score (up to 25 points)
+    length = len(password)
+    if length >= 12:
+        score += 25
+    elif length >= 10:
+        score += 20
+    elif length >= 8:
+        score += 15
+    elif length >= 6:
+        score += 10
+    else:
+        feedback.append("Password is too short")
+    
+    # Character variety (up to 75 points)
+    if re.search(r'[A-Z]', password):
+        score += 15
+    else:
+        feedback.append("Add uppercase letters")
+    
+    if re.search(r'[a-z]', password):
+        score += 15
+    else:
+        feedback.append("Add lowercase letters")
+    
+    if re.search(r'[0-9]', password):
+        score += 15
+    else:
+        feedback.append("Add numbers")
+    
+    if re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        score += 15
+    else:
+        feedback.append("Add special characters")
+    
+    # Extra points for variety (15 points)
+    char_variety = len(set(password)) / len(password)
+    score += int(15 * char_variety)
+    
+    # Provide appropriate feedback based on score
+    if score < 40:
+        strength = "Weak"
+    elif score < 70:
+        strength = "Medium"
+    else:
+        strength = "Strong"
+    
+    if not feedback:
+        feedback = [f"Password strength: {strength}"]
+    
+    return score, feedback

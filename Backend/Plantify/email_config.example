@@ -1,0 +1,22 @@
+# Django settings
+DEBUG=True
+SECRET_KEY=your-secret-key-here
+
+# Email settings
+# Use this for actual email sending (SMTP):
+# EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+# Use this for console output (development):
+EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+
+# SMTP configuration (for Gmail example)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password
+
+# Default email
+DEFAULT_FROM_EMAIL=PlantifyAI <noreply@plantifyai.com>
+
+# Database settings
+# DATABASE_URL=postgres://user:password@localhost:5432/db_name 
