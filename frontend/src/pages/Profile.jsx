@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axiosInstance from '../utils/axios';
 import { useNavigate } from 'react-router-dom';
-import { FaEdit, FaSave, FaCamera } from 'react-icons/fa';
+import { FaEdit, FaSave, FaCamera, FaUserCircle } from 'react-icons/fa';
 
 const Profile = () => {
   const [profile, setProfile] = useState(null);
@@ -9,6 +9,7 @@ const Profile = () => {
   const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState(null);
+  const [imageError, setImageError] = useState(false);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
 
@@ -123,7 +124,7 @@ const Profile = () => {
       };
 
       const response = await axiosInstance.put('/account/profile/', formData);
-      
+
       if (response.data) {
         setProfile(response.data);
         setIsEditing(false);
@@ -170,15 +171,18 @@ const Profile = () => {
           <div className="flex flex-col md:flex-row md:items-center gap-6 mb-8">
             <div className="flex flex-col items-center gap-2 relative">
               <div className="relative group">
-                <img
-                  src={editedProfile?.image_url || '/media/profile_pics/default.jpg'}
-                  alt="Profile"
-                  className="w-24 h-24 rounded-full object-cover border-4 border-white shadow"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = '/media/profile_pics/default.jpg';
-                  }}
-                />
+                {editedProfile?.image_url && !imageError ? (
+                  <img
+                    src={editedProfile.image_url}
+                    alt="Profile"
+                    className="w-24 h-24 rounded-full object-cover border-4 border-white shadow"
+                    onError={() => setImageError(true)}
+                  />
+                ) : (
+                  <div className="w-24 h-24 rounded-full border-4 border-white shadow flex items-center justify-center bg-gray-50">
+                    <FaUserCircle className="text-green-600 text-5xl" />
+                  </div>
+                )}
                 {isEditing && (
                   <div
                     onClick={handleImageClick}
