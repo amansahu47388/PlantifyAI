@@ -83,7 +83,7 @@ class RegisterView(APIView):
             UserProfile.objects.create(
                 user=user,
                 bio='',
-                location='',
+                address='',
                 phone=''
             )
             
