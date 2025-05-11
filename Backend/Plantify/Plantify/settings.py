@@ -111,9 +111,16 @@ DATABASES = {
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "OPTIONS": {
+            "user_attributes": ["username", "email", "first_name", "last_name"],
+            "max_similarity": 0.7,
+        }
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {
+            "min_length": 8,
+        }
     },
     {
         "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
@@ -122,6 +129,15 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+# Password strength parameters for frontend validation
+PASSWORD_STRENGTH_PARAMS = {
+    'MIN_LENGTH': 8,
+    'REQUIRE_UPPERCASE': True,
+    'REQUIRE_LOWERCASE': True, 
+    'REQUIRE_NUMBERS': True,
+    'REQUIRE_SPECIAL_CHARS': True,
+}
 
 
 # Internationalization

@@ -111,3 +111,37 @@ class EmailVerification(models.Model):
         return timezone.now() <= self.expires_at and not self.is_verified
 
 
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    token = models.CharField(max_length=100, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return f"Reset token for {self.user.email}"
+    
+    def is_valid(self):
+        """Check if token is valid (not expired and not used)"""
+        return not self.is_used and timezone.now() < self.expires_at
+    
+    @classmethod
+    def generate_token(cls, user, expiry_hours=24):
+        """Generate a password reset token for a user"""
+        # Invalidate any existing tokens
+        cls.objects.filter(user=user, is_used=False).update(is_used=True)
+        
+        # Generate new token
+        token = ''.join(random.choices(string.ascii_letters + string.digits, k=32))
+        expires_at = timezone.now() + timezone.timedelta(hours=expiry_hours)
+        
+        # Create token record
+        reset_token = cls.objects.create(
+            user=user,
+            token=token,
+            expires_at=expires_at
+        )
+        
+        return reset_token
+
+

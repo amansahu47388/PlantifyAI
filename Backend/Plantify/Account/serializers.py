@@ -5,7 +5,8 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from django.contrib.auth.models import User
-from .models import UserProfile
+from .models import UserProfile, PasswordResetToken
+from .utils import validate_password_strength
 
 
 class CiustomUserSerializer(serializers.ModelSerializer):
@@ -137,3 +138,66 @@ class ResendOTPSerializer(serializers.Serializer):
         except User.DoesNotExist:
             raise serializers.ValidationError("User with this email does not exist")
         return value
+
+
+class PasswordResetRequestSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    
+    def validate_email(self, value):
+        # Check if user with this email exists
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("User with this email does not exist.")
+        return value
+
+class PasswordResetVerifySerializer(serializers.Serializer):
+    token = serializers.CharField()
+    
+    def validate_token(self, value):
+        # Check if token exists and is valid
+        try:
+            token_obj = PasswordResetToken.objects.get(token=value, is_used=False)
+            if not token_obj.is_valid():
+                raise serializers.ValidationError("Token has expired.")
+        except PasswordResetToken.DoesNotExist:
+            raise serializers.ValidationError("Invalid token.")
+        return value
+
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    password = serializers.CharField(min_length=8, write_only=True)
+    password2 = serializers.CharField(min_length=8, write_only=True)
+    
+    def validate(self, data):
+        # Check if passwords match
+        if data['password'] != data['password2']:
+            raise serializers.ValidationError("Passwords do not match.")
+        
+        # Check if token exists and is valid
+        try:
+            token_obj = PasswordResetToken.objects.get(token=data['token'], is_used=False)
+            if not token_obj.is_valid():
+                raise serializers.ValidationError("Token has expired.")
+            self.token_obj = token_obj
+        except PasswordResetToken.DoesNotExist:
+            raise serializers.ValidationError("Invalid token.")
+        
+        # Validate password strength
+        is_valid, errors = validate_password_strength(data['password'])
+        if not is_valid:
+            raise serializers.ValidationError({"password": errors})
+        
+        return data
+    
+    def save(self):
+        # Get user from token
+        user = self.token_obj.user
+        
+        # Set new password
+        user.set_password(self.validated_data['password'])
+        user.save()
+        
+        # Mark token as used
+        self.token_obj.is_used = True
+        self.token_obj.save()
+        
+        return user
