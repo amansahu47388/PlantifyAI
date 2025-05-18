@@ -67,6 +67,9 @@ MIDDLEWARE = [
 # Add CORS settings
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Vite default port
+    "http://192.168.1.100:5173",  # Vite default port
+    "http://localhost:8081",  
+    "http://localhost:8082"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -237,3 +240,6 @@ EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', '')
 if not DEFAULT_FROM_EMAIL and EMAIL_HOST_USER:
     DEFAULT_FROM_EMAIL = f'PlantifyAI <{EMAIL_HOST_USER}>'
+
+# Add CORS settings
+CORS_ALLOW_ALL_ORIGINS = True  # For development only
