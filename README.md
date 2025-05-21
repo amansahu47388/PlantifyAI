@@ -1,6 +1,6 @@
-# PlantifyAI - Plant Disease Detection and Management System
+# PlantifyAI - Plant Disease Detection Prediction System
 
-PlantifyAI is a comprehensive plant disease detection and management system that combines the power of artificial intelligence with mobile and web technologies to help farmers and gardeners identify and manage plant diseases effectively.
+PlantifyAI is a comprehensive plant disease Prediction  system that combines the power of artificial intelligence with  web technologies to help farmers and gardeners identify and manage plant diseases effectively.
 
 ## Project Components
 
@@ -95,7 +95,7 @@ PlantifyAI is a comprehensive plant disease detection and management system that
 PlantifyAI/
 ├── Backend/               # Django backend
 ├── frontend/             # React web frontend
-└── App/                  # React Native mobile app
+
 ```
 
 ## Contributing
@@ -113,9 +113,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Contact
 
 For any queries or support, please contact us through the application's contact form or create an issue in the repository.
-
-## Acknowledgments
-
-- Plant disease dataset providers
-- Open source community
-- All contributors to this project
