@@ -86,7 +86,7 @@ const Header = () => {
           className={`text-2xl font-bold transition-colors ${scrolled ? "text-green-600" : "text-white"
             }`}
         >
-          Plantify AI
+         🌿 Plantify AI
         </Link>
 
         {/* Desktop Menu */}
