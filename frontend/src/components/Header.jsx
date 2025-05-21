@@ -125,9 +125,8 @@ const Header = () => {
               >
                 PREDICT DISEASE
               </Link>
-
               <div className="relative flex items-center gap-3" ref={dropdownRef}>
-                <span className="text-green-600 font-semibold hover:text-green-500">
+                <span className="text-green-600 font-semibold text-lg hover:text-green-500">
                   {profileData?.first_name || 'User'}
                 </span>
                 <button
