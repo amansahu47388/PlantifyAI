@@ -125,8 +125,10 @@ const Header = () => {
               >
                 PREDICT DISEASE
               </Link>
-
-              <div className="relative" ref={dropdownRef}>
+              <div className="relative flex items-center gap-3" ref={dropdownRef}>
+                <span className="text-green-600 font-semibold text-lg hover:text-green-500">
+                  {profileData?.first_name || 'User'}
+                </span>
                 <button
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                   className={`flex items-center justify-center w-10 h-10 rounded-full overflow-hidden transition ${scrolled ? "border-2 border-green-600" : "border-2 border-white"
